@@ -1,0 +1,51 @@
+module QP_module
+  !
+  ! Global definitions
+  !
+  implicit none
+  !
+  Double precision:: a,b,c,d !Potential parameters
+  Integer:: Ncon, Nval !Convergence dimension and studied levels
+  Double precision,allocatable:: H(:,:), E(:) !Hamiltonian and energies
+  !
+Contains
+  Subroutine Hamiltonian
+    !
+    ! This routine builds the diagonal and upper elements of
+    ! the Hamiltonian matrix
+    !
+    implicit none
+    !
+    Integer:: n
+    !
+    H=0.0d0 !Initialized
+    !
+    do n=0,Ncon !Diagonal
+       H(n,n) = 0.25d0 * (3.0d0*a+2.0d0*c+1.0d0) + (0.5d0+3.0d0*a+c)*dble(n) &
+            +1.5d0*a*dble(n)*dble(n-1)
+    enddo
+    !
+    do n=0,Ncon-1 !1st Diagonal
+       H(n,n+1) = ( (1.5d0*b+d) + 1.5d0*b*dble(n)) * sqrt(dble(n)+1.0d0) &
+            /sqrt(2.0d0)
+    enddo
+    !
+    do n=0,Ncon-2 !2nd Diagonal
+       H(n,n+2) = sqrt(dble(n)+1.0d0) *  &
+            (0.25d0*(-1.0d0+6.0d0*a+2.0d0*c)*sqrt(dble(n)) + &
+            a*dble(n)*sqrt(dble(n)+2.0d0) )
+    enddo
+    !
+    do n=0,Ncon-3 !3rd Diagonal
+       H(n,n+3) = b*(0.5d0/sqrt(2.0d0))*sqrt( dble(n+1)*dble(n+2)*dble(n+3))
+    enddo
+    !
+    do n=0,Ncon-4
+       H(n,n+4) = a*0.25d0*sqrt( dble(n+1)*dble(n+2)*dble(n+3)*dble(n+4) )
+    enddo
+    !
+  end Subroutine Hamiltonian
+  !
+end module QP_module
+
+  
