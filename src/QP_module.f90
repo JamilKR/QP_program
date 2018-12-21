@@ -99,6 +99,14 @@ Contains
     !
     call Hamiltonian(Ncon) !A bigger system
     !
+    E=0.0d0 !Initialized
+    !
+    call la_syevr(A=H, W=E, JOBZ='V', UPLO='U')
+    !
+    Ezero=minval(E)
+    !
+    E=E-Ezero
+    !
     do while ( & !Convergence's criteria
          abs(Eold(1)-E(Nval-2)) .gt. tol .and. &
          abs(Eold(2)-E(Nval-1)) .gt. tol .and. &
