@@ -2,9 +2,11 @@ module QP_module
   !
   ! Global definitions
   !
+  use f95_lapack, only : la_syevr
+  !
   implicit none
   !
-  Double precision:: a,b,c,d !Potential parameters
+  Double precision:: a,b,c,d,tol !Potential parameters
   Integer:: Ncon, Nval !Convergence dimension and studied levels
   Double precision,allocatable:: &
        H(:,:),&    !Hamiltonian
@@ -51,9 +53,13 @@ Contains
     !
   end Subroutine Hamiltonian
   !
+  !*****************************************************************************
+  !
   Function IPR_fun(V)
     !
     !This function compute the IPR
+    !
+    implicit none
     !
     Double precision:: V(0:Ncon,0:Ncon)
     Double precision:: IPR_fun(0:Nval)
@@ -69,7 +75,57 @@ Contains
     end do
     !
   end Function IPR_fun
-  
+  !
+  !*****************************************************************************
+  !
+  Subroutine Convergence
+    !
+    !This routine studies the energies convergence.
+    !The program will increasses the truncation dim with step of 10 and look for
+    !convergence in the three eigenstates E(Nval), E(Nval-1), E(Nval-2)
+    !
+    implicit none
+    !
+    Double precision:: Eold(1:3) !Last eigenvalues
+    Integer:: k
+    !
+    Eold=E(Nval-2:Nval)
+    !
+    deallocate(H,E)
+    !
+    Ncon=Ncon+10 !Increasing HS dim
+    !
+    allocate(H(0:Ncon,0:Ncon),E(0:Ncon)) !New allocation
+    !
+    call Hamiltonian(Ncon) !A bigger system
+    !
+    do while ( & !Convergence's criteria
+         abs(Eold(1)-E(Nval-2)) .gt. tol .and. &
+         abs(Eold(2)-E(Nval-1)) .gt. tol .and. &
+         abs(Eold(3)-E(Nval  )) .gt. tol        )
+       !
+       Eold=E(Nval-2:Nval)
+       !
+       Ncon=Ncon+10 !Increasing HS dim
+       !
+       deallocate(H,E)
+       !
+       allocate(H(0:Ncon,0:Ncon),E(0:Ncon)) !New allocation
+       !
+       call Hamiltonian(Ncon) !A bigger system
+       !
+       E=0.0d0 !Initialized
+       !
+       call la_syevr(A=H, W=E, JOBZ='V', UPLO='U')
+       !
+       Ezero=minval(E)
+       !
+       E=E-Ezero
+       !
+    enddo
+    !
+  end Subroutine Convergence
+  !      
 end module QP_module
 
   

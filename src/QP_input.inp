@@ -1,7 +1,7 @@
 #
 #Hilbert Space
 #
-&HIL Ncon=1000, Nval=50 /
+&HIL Ncon=50, Nval=50 /
 #
 #Potential parameters
 #
@@ -9,7 +9,7 @@
 #
 #Methodology and outputs
 #
-&OUT CONV=.T., IPR=.T./
+&OUT CONV=.T., IPR=.T., tol=1.0d-6 /
 #
 # CONV: if TRUE, the convergence will be studied
 # IPR : if TRUE, the IPR will be computed

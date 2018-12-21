@@ -10,7 +10,7 @@ program QP_program
   !
   Namelist/HIL/ Ncon,Nval
   Namelist/POT/ a,b,c,d
-  Namelist/OUT/CONV,IPR
+  Namelist/OUT/CONV,IPR,tol
   !
   read(*,*) nm_file
   !
@@ -21,6 +21,7 @@ program QP_program
   read(11,OUT)
   !
   close(11)
+  !
   !
   allocate(H(0:Ncon,0:Ncon),E(0:Ncon))
   !
@@ -33,6 +34,12 @@ program QP_program
   Ezero=minval(E)
   !
   E=E-Ezero
+  !
+  if (CONV) then
+     !
+     call Convergence
+     !
+  endif  
   !
   write(*,*) 
   write(*,*) 
