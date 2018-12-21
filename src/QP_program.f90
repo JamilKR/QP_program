@@ -57,16 +57,23 @@ program QP_program
   !
   if (IPR) then
      !
-     allocate(IPR_vec(0:Nval))
+     allocate(IPR_vec(0:Nval),x_prod(0:Nval))
      !
      IPR_vec = IPR_fun(H)
      !
+     call mean_x
+     !
+     write(*,'(A)') '# k - E_k - IPR(k) - <k|x|k>'
+     !
      do i=0,Nval
-        write(*,*) i,E(i),IPR_vec(i)
+        write(*,*) i,E(i),IPR_vec(i),x_prod(i)
      enddo
      !
   else
-     !   
+     !
+     write(*,'(A)') '# k - E_k'
+
+     !
      do i=0,Nval
         write(*,*) i,E(i)
      enddo

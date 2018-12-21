@@ -9,9 +9,10 @@ module QP_module
   Double precision:: a,b,c,d,tol !Potential parameters
   Integer:: Ncon, Nval !Convergence dimension and studied levels
   Double precision,allocatable:: &
-       H(:,:),&    !Hamiltonian
-       E(:),&      !Energies
-       IPR_vec(:)  !IPR
+       H(:,:),&     !Hamiltonian
+       E(:),&       !Energies
+       IPR_vec(:),& !IPR
+       x_prod(:)    !X mean value
   Double precision:: Ezero !Zero energy
   Logical:: CONV,IPR 
   !
@@ -133,7 +134,36 @@ Contains
     enddo
     !
   end Subroutine Convergence
-  !      
+  !   
+  !*****************************************************************************
+  !
+  Subroutine mean_x
+    !
+    !This subroutine compute <k|x|k>
+    !
+    implicit none
+    !
+    integer i,n
+    !
+    x_prod=0.0d0
+    !
+    do i=0,Nval
+       !
+       x_prod(i)= H(0,i) *  H(1,i)
+       !
+       do n=1,Ncon
+          !
+          x_prod(i)=x_prod(i) +  H(n,i) * &
+               ( sqrt(dble(n)+1.0d0) * H(n+1,i) + sqrt(dble(n)) * H(n-1,i) )
+          !
+       enddo
+       !
+       x_prod(i)=x_prod(i)/sqrt(2.0d0)
+       !
+    enddo
+    !
+  end Subroutine mean_x
+  !
 end module QP_module
 
   

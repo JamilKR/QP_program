@@ -17,7 +17,7 @@ if [ $k = 0 ]; then
 	mkdir ../bin
 	echo ../bin folder created
 else
-	echo ../bin folder exist
+	echo ../bin folder exists
 fi
 #
 endef
