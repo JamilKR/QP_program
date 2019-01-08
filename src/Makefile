@@ -41,7 +41,11 @@ OPT  = -cpp -I/usr/local/lib/lapack95/lapack95_modules -I/usr/local/include/lapa
 	gfortran -c $(OPT)  "$<"
 
 #
-
+all: folder_set QP_pgr
+#
+.phony : all
+#
+#
 QP_pgr: $(QP_pgr_obj) Makefile
 	$(info)
 	gfortran -o $(bin_path)/$@.out $(QP_pgr_obj) $(OPT) $(LIBS)
