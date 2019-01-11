@@ -38,15 +38,19 @@ done
 if [ $k = 0 ]; then
 	mkdir ../bin
 	echo ../bin folder created
+	echo
 else
 	echo ../bin folder exists
+	echo
 fi
 #
 if [ $q = 0 ]; then
 	mkdir ../obj
 	echo ../obj folder created
+	echo
 else
 	echo ../obj folder exists
+	echo
 fi
 #
 endef
@@ -61,28 +65,54 @@ bin_path = ../bin
 obj_path = ../obj
 #
 QP_pgr_src = QP_module.f90 QP_program.f90
-QP_pgr_obj = QP_module.o   QP_program.o #$(obj_path)/$@QP_module.o $(obj_path)/$@QP_program.o
+QP_pgr_obj = $(QP_pgr_src:.f90=.o) 
+##
+
+vpath %.f ./quadpack # tells make to look for any dependency whose name ends in `.f' in the directory ./quadpack.
+
+Quadpack_src = dqc25s.f  dqcheb.f  dqk15w.f  dqwgts.f
+Quadpack_obj = $(Quadpack_src:.f=.o)
+
 
 .SUFFIXES: 
-.SUFFIXES: .o .f90 .oOMP 
+.SUFFIXES: .o .f90 .oOMP .f
 #
 .f90.o:
+	$(info )
 	$(FC)  -c -cpp $(mod_lib)  "$<" -o $(obj_path)/$@
+	$(info )
+
+
+
+.f.o:
+	$(info )
+	$(FC) -c -cpp  "$<" $(LIBS) -o $(obj_path)/$@
+	$(info )
 
 
 #
-all: folder_set QP_pgr
+all: folder_set Quadpack QP_pgr 
 #
 .phony : all
 #
 #
+#*******************************************************************************
 QP_pgr:	$(QP_pgr_obj) Makefile
-	$(info)
-	$(FC) -o $(bin_path)/$@.out $(obj_path)/*.o  -cpp $(mod_lib) $(LIBS)
+	$(info )
+	$(FC) -o $(bin_path)/$@.out  $(addprefix $(obj_path)/,$(QP_pgr_obj))  -cpp $(mod_lib) $(LIBS)
+	$(info )
 
 
+#*******************************************************************************
+Quadpack:	$(Quadpack_obj) Makefile
+		$(info )
+		ar cr $(obj_path)/quadpack.a $(addprefix $(obj_path)/,$(Quadpack_obj))
+		$(info )
+
+
+#*******************************************************************************
 clean:
 	@(rm -f *.o *.mod)
 	@(rm -f $(bin_path)/*out)
-	@(rm -f $(obj_path)/*o)
+	@(rm -f $(obj_path)/*o $(obj_path)/*a)
 
