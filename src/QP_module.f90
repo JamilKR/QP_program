@@ -87,10 +87,11 @@ Contains
     !
     implicit none
     !
-    Double precision:: Eold(1:3) !Last eigenvalues
+    Double precision:: Eold(1:3),xold(1:3) !Last eigenvalues
     Integer:: k
     !
     Eold=E(Nval-2:Nval)
+    xold=x_prod(Nval-2:Nval)
     !
     deallocate(H,E)
     !
@@ -108,18 +109,24 @@ Contains
     !
     E=E-Ezero
     !
+    call mean_x(Ncon)
+    !
     do while ( & !Convergence's criteria
          abs(Eold(1)-E(Nval-2)) .gt. tol .and. &
          abs(Eold(2)-E(Nval-1)) .gt. tol .and. &
-         abs(Eold(3)-E(Nval  )) .gt. tol        )
+         abs(Eold(3)-E(Nval  )) .gt. tol .and. &
+         abs(xold(1)-x_prod(Nval-2)) .gt. tol .and. &
+         abs(xold(2)-x_prod(Nval-1)) .gt. tol .and. &
+         abs(xold(3)-x_prod(Nval  )) .gt. tol       )
        !
        Eold=E(Nval-2:Nval)
+       xold=x_prod(Nval-2:Nval)
        !
        Ncon=Ncon+10 !Increasing HS dim
        !
-       deallocate(H,E)
+       deallocate(H,E,x_prod)
        !
-       allocate(H(0:Ncon,0:Ncon),E(0:Ncon)) !New allocation
+       allocate(H(0:Ncon,0:Ncon),E(0:Ncon),x_prod(0:Nval)) !New allocation
        !
        call Hamiltonian(Ncon) !A bigger system
        !
@@ -131,17 +138,21 @@ Contains
        !
        E=E-Ezero
        !
+       call mean_x(Ncon)
+       !
     enddo
     !
   end Subroutine Convergence
   !   
   !*****************************************************************************
   !
-  Subroutine mean_x
+  Subroutine mean_x(Nmax)
     !
     !This subroutine compute <k|x|k>
     !
     implicit none
+    !
+    integer::Nmax
     !
     integer i,n
     !
@@ -151,7 +162,7 @@ Contains
        !
        x_prod(i)= H(0,i) *  H(1,i)
        !
-       do n=1,Ncon
+       do n=1,Nmax
           !
           x_prod(i)=x_prod(i) +  H(n,i) * &
                ( sqrt(dble(n)+1.0d0) * H(n+1,i) + sqrt(dble(n)) * H(n-1,i) )

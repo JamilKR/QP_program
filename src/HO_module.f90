@@ -59,6 +59,7 @@ contains
     integer:: xdim  !size(x_vec)
     double precision,allocatable:: HO_WF(:,:)
     integer i
+    double precision:: norma !norma test
     !
     xdim = size(x_vec)
     allocate( HO_WF(xdim,0:N))
@@ -66,10 +67,37 @@ contains
     HO_WF = Hermite (N,x_vec)
     !
     do i=0,N
-       HO_WF(:,i) = ( 1.0d0 / (dsqrt( (2.0d0)**(dble(i)) * dGAMMA(dble(i+1)) ) &
-            * pi**0.25d0 )) * dexp(- 0.5d0* (x_vec(:))**2.0d0)  * &
-            HO_WF(:,i)       
+       HO_WF(:,i) = ( 1.0d0 / dsqrt( (2.0d0)**(dble(i)))) * &
+            (1.0d0/dsqrt(dGAMMA(dble(i+1)))) * &
+            (1.0d0/dsqrt(dsqrt(pi)) ) * &
+            dexp(- 0.5d0* (x_vec(:))**2.0d0)  * &
+            HO_WF(:,i)
     enddo
+    !
+    !We test the norma of the most excited state we consider and take care that
+    !x's range is enough.
+    !
+    norma = 0.0d0
+    !
+    do i=1,xdim
+       norma = norma + HO_WF(i,N)*HO_WF(i,N)
+    enddo
+    !
+    norma = norma*dabs(x_vec(1)-x_vec(2))
+    write(*,*)
+    write(*,*) norma, "HO Nval-th Wave function Norm"
+    write(*,*)
+    !
+    if (norma .lt. 0.9999d0 .or. norma .gt. 1.0001d0) then
+       !
+       write(*,*)
+       write(*,'(A)') "HO Wave Functions ERROR: X range must be longer!"
+       write(*,'(A,F7.4)') "Normalization criteria: 0.9999 < Norm < 1.0001! Norm=", norma
+       write(*,*)
+       !
+       STOP
+       !
+    endif
     !
   end Function HO_WF
   !

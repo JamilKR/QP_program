@@ -1,15 +1,21 @@
 #
 #Hilbert Space
 #
-&HIL Ncon=50, Nval=50 /
+&HIL Ncon=50, Nval=40 /
 #
 #Potential parameters
 #
-&POT a=0.0d0, b=0.0d0, c=0.5d0, d=-1.0d0 /
+&POT a=0.1d0, b=0.0d0, c=-5.0d0, d=5.0d0 /
 #
 #Methodology and outputs
 #
-&OUT CONV=.T., IPR=.T., tol=1.0d-6 /
+&OUT CONV=.T., IPR=.T., tol=1.0d-3, temp='g' /
 #
 # CONV: if TRUE, the convergence will be studied
 # IPR : if TRUE, the IPR will be computed
+#
+# Wave Packets evolution
+#
+&XAXIS x0=-35.0d0, xdim=7000, xstep=0.01d0 /
+#
+&GAUSS sigma=1.0d0, mu= -5.2d0 /

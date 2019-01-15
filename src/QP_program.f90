@@ -1,6 +1,8 @@
 program QP_program
   !
   use QP_module
+  use Harmonic_oscillator
+  use QP_tmp_ev
   use f95_lapack, only : la_syevr
   !
   implicit none
@@ -10,7 +12,9 @@ program QP_program
   !
   Namelist/HIL/ Ncon,Nval
   Namelist/POT/ a,b,c,d
-  Namelist/OUT/CONV,IPR,tol
+  Namelist/OUT/CONV,IPR,tol,temp
+  Namelist/XAXIS/x0,xdim,xstep
+  Namelist/GAUSS/sigma, mu
   !
   read(*,*) nm_file
   !
@@ -19,11 +23,13 @@ program QP_program
   read(11,HIL)
   read(11,POT)
   read(11,OUT)
+  read(11,XAXIS)
+  read(11,GAUSS)
   !
   close(11)
   !
   !
-  allocate(H(0:Ncon,0:Ncon),E(0:Ncon))
+  allocate(H(0:Ncon,0:Ncon),E(0:Ncon),x_prod(0:Nval))
   !
   call Hamiltonian(Ncon)
   !
@@ -34,6 +40,8 @@ program QP_program
   Ezero=minval(E)
   !
   E=E-Ezero
+  !
+  call mean_x(Ncon) !<x> criteria added to convergence subroutine
   !
   if (CONV) then
      !
@@ -57,11 +65,11 @@ program QP_program
   !
   if (IPR) then
      !
-     allocate(IPR_vec(0:Nval),x_prod(0:Nval))
+     allocate(IPR_vec(0:Nval))
      !
      IPR_vec = IPR_fun(H)
      !
-     call mean_x
+     !call mean_x Not necessary, called beafore
      !
      write(*,'(A)') '# k - E_k - IPR(k) - <k|x|k>'
      !
@@ -77,6 +85,23 @@ program QP_program
      do i=0,Nval
         write(*,*) i,E(i)
      enddo
+     !
+  endif
+  !
+  if (temp=='g') then
+     !
+     allocate(HO(xdim,0:Ncon))
+     allocate(x_vec(xdim))
+     !
+     x_vec(1)=x0
+     !
+     do i=2,xdim
+        x_vec(i)=x_vec(i-1)+xstep
+     enddo
+     !        
+     HO=HO_WF(Ncon,x_vec) ! Harmonic Oscillator WF
+     !
+     call Coefficients
      !
   endif
   !
