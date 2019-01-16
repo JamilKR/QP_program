@@ -101,9 +101,13 @@ program QP_program
         x_vec(i)=x_vec(i-1)+xstep
      enddo
      !        
-     HO=HO_WF(Ncon,x_vec) ! Harmonic Oscillator WF
+     HO=HO_WF(Ncon,x_vec) ! Harmonic Oscillator WFs
      !
-     call Coefficients
+     call Coefficients    ! WP Coefficients in eigenvectors basis
+     !
+     call Trans_x_matrix  ! x_mtx(i,j)= < psi_i | x | psi_j >
+     !
+     
      !
   Case Default
      !

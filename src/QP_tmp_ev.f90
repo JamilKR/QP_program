@@ -103,7 +103,7 @@ contains
              !
           enddo
           !
-          aux = aux + dble(Ncon) * H(Nmax-1,k) * H(Nmax,l)
+          aux = aux + dble(Ncon) * H(Ncon-1,k) * H(Ncon,l)
           !
           x_mtx(k,l) = aux / dsqrt(2.0d0)         
           !
