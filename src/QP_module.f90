@@ -138,7 +138,7 @@ Contains
        !
        E=E-Ezero
        !
-       call mean_x(Ncon)
+       call mean_x(Ncon-1)
        !
     enddo
     !
@@ -152,7 +152,7 @@ Contains
     !
     implicit none
     !
-    integer::Nmax
+    integer::Nmax 
     !
     integer i,n
     !
@@ -162,12 +162,15 @@ Contains
        !
        x_prod(i)= H(0,i) *  H(1,i)
        !
-       do n=1,Nmax
+       do n=1,Nmax-1 ! Nmax term below
           !
           x_prod(i)=x_prod(i) +  H(n,i) * &
                ( sqrt(dble(n)+1.0d0) * H(n+1,i) + sqrt(dble(n)) * H(n-1,i) )
           !
        enddo
+       !
+       ! Array(Nmax+1) excluded: non-allocated memory unit!
+       x_prod(i)=x_prod(i) + H(Nmax,i) * sqrt(dble(n)) * H(Nmax-1,i) 
        !
        x_prod(i)=x_prod(i)/sqrt(2.0d0)
        !
