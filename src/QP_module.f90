@@ -170,7 +170,7 @@ Contains
        enddo
        !
        ! Array(Nmax+1) excluded: non-allocated memory unit!
-       x_prod(i)=x_prod(i) + H(Nmax,i) * sqrt(dble(n)) * H(Nmax-1,i) 
+       x_prod(i)=x_prod(i) + H(Nmax,i) * sqrt(dble(Nmax)) * H(Nmax-1,i) 
        !
        x_prod(i)=x_prod(i)/sqrt(2.0d0)
        !

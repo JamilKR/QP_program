@@ -10,7 +10,6 @@ Module QP_tmp_ev
   Character(len=1):: temp !input: if = 'g' ---> gaussian WF
   Double complex, allocatable::   &
        Psi(:)  !Wave packet
-  Double precision, allocatable:: Coef(:) !WP coefficients
   Double precision:: &
        sigma,  & !Distribution amplitude
        mu,     & !Distribution center
@@ -18,9 +17,11 @@ Module QP_tmp_ev
        xstep     ! abs( x_vec(1) - x_vec(2))
   integer:: xdim !Total x-points
   Double precision, allocatable:: &
-       Prob(:), & !Prob density
-       HO(:,:), & !HO Wave Funcions
-       x_vec(:)
+       Prob(:),   & !Prob density
+       HO(:,:),   & !HO Wave Funcions
+       x_vec(:),  & !X-axis
+       Coef(:),   & !WP coefficients
+       x_mtx(:,:)   !< psi_i | x | psi_j >
   !
 contains
   !
@@ -73,6 +74,43 @@ contains
     endif
     !
   end Subroutine Coefficients
+  !  
+  !*****************************************************************************
+  !
+  Subroutine Trans_x_matrix
+    !
+    !This routine compute x_mtx(i,j)= < psi_i | x | psi_j > with Hamiltonian's
+    !eigenstates.
+    !
+    implicit none
+    !
+    integer:: n,k,l
+    double precision:: aux
+    !
+    allocate(x_mtx(0:Nval,0:Nval))
+    !
+    x_mtx=0.0d0
+    !
+    do l=0,Nval !column fixed
+       do k=0,Nval !row fixed
+          !
+          aux = H(1,k) * H(0,l) 
+          !
+          do n = 1,Ncon-1 ! Last addend excluded
+             !
+             aux = aux + H(n,l) * ( &
+                  dble(n+1)*H(n+1,k) + dble(n)*H(n-1,k) )
+             !
+          enddo
+          !
+          aux = aux + dble(Ncon) * H(Nmax-1,k) * H(Nmax,l)
+          !
+          x_mtx(k,l) = aux / dsqrt(2.0d0)         
+          !
+       enddo
+    enddo
+    !
+  end Subroutine Trans_x_matrix
   !  
   !*****************************************************************************
   !
