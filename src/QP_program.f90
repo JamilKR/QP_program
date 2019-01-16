@@ -88,7 +88,9 @@ program QP_program
      !
   endif
   !
-  if (temp=='g') then
+  Select case (temp)
+     !
+  Case ('g') 
      !
      allocate(HO(xdim,0:Ncon))
      allocate(x_vec(xdim))
@@ -103,6 +105,15 @@ program QP_program
      !
      call Coefficients
      !
-  endif
+  Case Default
+     !
+     write(*,*)
+     write(*,'(A)') "Temporal evolution not required"
+     write(*,*)
+     STOP
+     !
+  end Select
+  !
+     
   !
 end program QP_program
