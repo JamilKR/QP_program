@@ -64,7 +64,7 @@ folder_set: ; @$(value folder_set)
 bin_path = ../bin
 obj_path = ../obj
 #
-QP_pgr_src = QP_module.f90 HO_module.f90 QP_tmp_ev.f90 QP_program.f90 
+QP_pgr_src = HO_module.f90 QP_module.f90 QP_tmp_ev.f90 QP_program.f90 
 QP_pgr_obj = $(QP_pgr_src:.f90=.o) 
 ##
 

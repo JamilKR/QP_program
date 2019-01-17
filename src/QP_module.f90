@@ -3,18 +3,27 @@ module QP_module
   ! Global definitions
   !
   use f95_lapack, only : la_syevr
+  use Harmonic_oscillator
   !
   implicit none
   !
   Double precision:: a,b,c,d,tol !Potential parameters
   Integer:: Ncon, Nval !Convergence dimension and studied levels
   Double precision,allocatable:: &
-       H(:,:),&     !Hamiltonian
-       E(:),&       !Energies
-       IPR_vec(:),& !IPR
-       x_prod(:)    !X mean value
+       H(:,:),      &!Hamiltonian
+       HO(:,:),     &!HO Wave Funcions
+       QP_mtx(:,:), &!QP_mtx(:,k) = < x | psi_k >
+       E(:),        &!Energies
+       IPR_vec(:),  &!IPR
+       x_prod(:),   &!X mean value
+       x_vec(:)      !X-axis
+
   Double precision:: Ezero !Zero energy
-  Logical:: CONV,IPR 
+  Logical:: CONV,IPR
+  Double Precision:: &
+       x0,     & !Lowest x value
+       xstep     ! abs( x_vec(1) - x_vec(2))
+  Integer:: xdim !Total x-points
   !
 Contains
   Subroutine Hamiltonian(Nmax)
@@ -177,6 +186,33 @@ Contains
     enddo
     !
   end Subroutine mean_x
+  !
+  !*****************************************************************************
+  !
+  Subroutine QP_WF_routine
+    !
+    !This subroutine computes the QP_mtx(:,k) = < x | psi_k > with
+    ! H | psi_k > = E_k | psi_k >
+    !
+    implicit none
+    !
+    integer:: k, n
+    !
+    allocate(QP_mtx(1:xdim,0:Nval))
+    !
+    QP_mtx=0.0d0
+    !
+    do k = 0,Nval
+       !
+       do n = 0,Ncon
+          !
+          QP_mtx(:,k) = QP_mtx(:,k) + H(n,k)*HO(:,n)
+          !
+       enddo
+       !
+    enddo
+    !
+  end Subroutine QP_WF_routine
   !
 end module QP_module
 

@@ -1,7 +1,7 @@
 program QP_program
   !
-  use QP_module
   use Harmonic_oscillator
+  use QP_module
   use QP_tmp_ev
   use f95_lapack, only : la_syevr
   !
@@ -15,6 +15,7 @@ program QP_program
   Namelist/OUT/CONV,IPR,tol,temp
   Namelist/XAXIS/x0,xdim,xstep
   Namelist/GAUSS/sigma, mu
+  Namelist/TMP/tmax,tstep,outfile_tmp
   !
   read(*,*) nm_file
   !
@@ -25,6 +26,7 @@ program QP_program
   read(11,OUT)
   read(11,XAXIS)
   read(11,GAUSS)
+  read(11,TMP)
   !
   close(11)
   !
@@ -101,13 +103,25 @@ program QP_program
         x_vec(i)=x_vec(i-1)+xstep
      enddo
      !        
-     HO=HO_WF(Ncon,x_vec) ! Harmonic Oscillator WFs
+     HO = HO_WF(Ncon,x_vec) ! Harmonic Oscillator WFs
+     !
+     call QP_WF_routine !Quartic Potential eigenfunctions > QP_mtx(x,psi_k)
      !
      call Coefficients    ! WP Coefficients in eigenvectors basis
      !
      call Trans_x_matrix  ! x_mtx(i,j)= < psi_i | x | psi_j >
      !
-     
+     !Temporal evolution
+     !
+     tdim = int(tmax/tstep)
+     !
+     allocate(t_vec(1:tdim))
+     !
+     t_vec(1)=0.0d0
+     !
+     do i=2,tdim
+        t_vec(i) = t_vec(i-1) + tstep
+     enddo
      !
   Case Default
      !

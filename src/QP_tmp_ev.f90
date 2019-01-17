@@ -2,26 +2,27 @@ Module QP_tmp_ev
   !
   ! Temporal evolution of a wave packet
   !
-  use QP_module
   use Harmonic_oscillator
+  use QP_module
   !
   implicit none
   !
   Character(len=1):: temp !input: if = 'g' ---> gaussian WF
+  Character(len=60):: outfile_tmp !Temporal evolution outfile
   Double complex, allocatable::   &
        Psi(:)  !Wave packet
   Double precision:: &
        sigma,  & !Distribution amplitude
-       mu,     & !Distribution center
-       x0,     & !Lowest x value
-       xstep     ! abs( x_vec(1) - x_vec(2))
-  integer:: xdim !Total x-points
+       mu        !Distribution center
   Double precision, allocatable:: &
        Prob(:),   & !Prob density
-       HO(:,:),   & !HO Wave Funcions
-       x_vec(:),  & !X-axis
        Coef(:),   & !WP coefficients
        x_mtx(:,:)   !< psi_i | x | psi_j >
+  Double precision, allocatable:: t_vec(:) !Temporal axis points
+  Double precision:: &
+       tmax,   & !Maximun point
+       tstep     !abs( t_vec(1) - t_vec(2))
+  Integer:: tdim !Total t-points
   !
 contains
   !
@@ -37,18 +38,33 @@ contains
     allocate(coef(0:Nval))
     coef=0.0d0
     !
-    do i=0,Nval
-       do j=0,Ncon
-          aux=0.0d0
-          do xx=1,xdim
-             aux = aux + dexp( -((x_vec(xx)-mu)**2.0d0)/(4.0d0* sigma**2.0d0)) &
-                  *HO(xx,j)
-          enddo
-          coef(i) = coef(i) + aux * H(j,i) * dabs(x_vec(1)-x_vec(2))
-       enddo
-    enddo
+    ! do i=0,Nval
+    !    do j=0,Ncon
+    !       aux=0.0d0
+    !       do xx=1,xdim
+    !          aux = aux + dexp( -((x_vec(xx)-mu)**2.0d0)/(4.0d0* sigma**2.0d0)) &
+    !               *HO(xx,j)
+    !       enddo
+    !       coef(i) = coef(i) + aux * H(j,i) * dabs(x_vec(1)-x_vec(2))
+    !    enddo
+    ! enddo
     !
-    coef = coef/dsqrt( sigma*dsqrt(2.0d0*pi) )
+    do i = 0,Nval
+       !
+       aux=0.0d0
+       !
+       do xx = 1,xdim
+          !
+          aux = aux + dexp( -((x_vec(xx)-mu)**2.0d0)/(4.0d0* sigma**2.0d0)) * &
+               QP_mtx(xx,i)
+          !
+       enddo
+       !
+       coef(i) = aux
+       !
+    enddo
+    !         
+    coef = (coef*xstep)/dsqrt( sigma*dsqrt(2.0d0*pi) )
     !
     !Norma test
     !
@@ -114,12 +130,32 @@ contains
   !  
   !*****************************************************************************
   !
-  Subroutine Prob_dens
-    !
-    !This routine builds the Wave Packet and the Prob Dens Function
-    !
-    implicit none
-    !
-  end Subroutine Prob_dens
+  ! Subroutine Prob_dens
+!     !
+!     !This routine builds the Wave Packet and the Prob Dens Function
+!     !
+!     implicit none
+!     !
+!     integer:: t,k
+!     !
+!     allocate(Psi(1:xdim),Prob(1:xdim))
+!     !
+!     open(unit=21,file=trim(outfile),status='new')
+!     !
+!     do 10 t = 1,tdim
+!        !
+!        Psi  = 0.0d0
+!        Prob = (0.0d0,0.0d0)
+!        !
+!        do 20 k = 0,Nval
+!           !
+!           psi(:) = psi(:) + coef(k) * zexp( (0.0d0,-E(k)*t_vec(t)) ) *
+       
+! 10  enddo
+    
+!     !
+!     close(21)
+!     !
+!   end Subroutine Prob_dens
   !
 end Module QP_tmp_ev
