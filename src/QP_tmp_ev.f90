@@ -23,6 +23,7 @@ Module QP_tmp_ev
        tmax,   & !Maximun point
        tstep     !abs( t_vec(1) - t_vec(2))
   Integer:: tdim !Total t-points
+  Double Precision:: Emean !< Psi | H | Psi >
   !
 contains
   !
@@ -130,32 +131,91 @@ contains
   !  
   !*****************************************************************************
   !
-  ! Subroutine Prob_dens
-!     !
-!     !This routine builds the Wave Packet and the Prob Dens Function
-!     !
-!     implicit none
-!     !
-!     integer:: t,k
-!     !
-!     allocate(Psi(1:xdim),Prob(1:xdim))
-!     !
-!     open(unit=21,file=trim(outfile),status='new')
-!     !
-!     do 10 t = 1,tdim
-!        !
-!        Psi  = 0.0d0
-!        Prob = (0.0d0,0.0d0)
-!        !
-!        do 20 k = 0,Nval
-!           !
-!           psi(:) = psi(:) + coef(k) * zexp( (0.0d0,-E(k)*t_vec(t)) ) *
-       
-! 10  enddo
-    
-!     !
-!     close(21)
-!     !
-!   end Subroutine Prob_dens
+  Subroutine Prob_dens
+    !
+    !This routine builds the Wave Packet and the Prob Dens Function
+    !
+    implicit none
+    !
+    Integer:: t,k,i
+    Double precision:: x_aux
+    Double precision,allocatable::auxX(:)
+    !
+    allocate(Psi(1:xdim),Prob(1:xdim),auxX(1:xdim))
+    !
+    open(unit=21,file=trim(outfile_tmp)//".dat",status='replace')
+    inquire(21)
+    !
+    open(unit=31,file=trim(outfile_tmp)//"_Xmean.dat",status='replace')
+    inquire(31)
+    !
+    write(21,11) 
+    write(21,12) xdim,x0,xstep
+    write(21,13) tmax,tstep
+    write(21,14)
+    !
+    write(31,21) 
+    !
+11  format("# Rows: Psi(x,t=cte); Columns: Psi(x=cte,t)")
+12  format("# X-axis: Total points:", I5, " ; x0:",F7.2" ; x-step:",F7.5)
+13  format("# T-evol: Initial t0: 0.0; T-max:",F7.2," ; t-step:",F7.5)
+14  format("# The Prob density is displaced the value < Psi | H | Psi >")
+    !
+21  format("# 1 column: < Psi | x | Psi >")
+    !
+    do 10 t = 1,tdim
+       !
+       Psi   = (0.0d0,0.0d0)
+       Prob  =  0.0d0
+       x_aux =  0.0d0
+       auxX  =  0.0d0
+       !
+       do 20 k = 0,Nval
+          !
+          ! psi(:) = psi(:) + dcmplx(coef(k),0.0d0)   * &
+          !      zexp( dcmplx(0.0d0,-E(k)*t_vec(t)) ) * &
+          !      dcmplx(QP_mtx(:,k),0.0d0)
+          psi(:) = psi(:) + dcmplx ( &
+               + coef(k) * dcos(E(k)*t_vec(t)) * QP_mtx(:,k) , &
+               - coef(k) * dsin(E(k)*t_vec(t)) * QP_mtx(:,k)   )
+          !
+20     enddo
+       !
+       !WavePackets computed
+       !Now we must obtain P = |psi|**2
+       !
+       Prob(:) = abs(psi(:))**2.0d0
+       auxX(:) = Prob(:)*x_vec(:) 
+       x_aux   = xstep*sum(auxX)
+       !
+       write(21,*) ( Prob(i) + Emean, i=1,xdim )
+       write(31,*) dble(x_aux)
+       !
+10  enddo
+    !
+    close(21)
+    close(31)
+    !
+  end Subroutine Prob_dens
+  !  
+  !*****************************************************************************
+  !
+  Subroutine E_mean_WP
+    !
+    ! This routine computes the E mean value: < Psi | H | Psi >
+    !
+    implicit none
+    !
+    Integer:: i
+    !
+    Emean=0.0d0
+    !
+    do i = 0,Nval
+       !
+       Emean = Emean + coef(i)*coef(i)*E(i)
+       !
+    enddo
+    !
+  end Subroutine E_mean_WP
   !
 end Module QP_tmp_ev

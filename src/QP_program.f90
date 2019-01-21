@@ -62,7 +62,7 @@ program QP_program
   !
 14 format("# Potential V(x)=ax**4+bx**3+cx**2+dx")
 15 format('# Hilbert Space truncated:',I5,';  States considered: g.s. + ',I5)
-16 format('# a = ',F6.2,'; b= ',F6.2,'; c= ',F6.2,'; d= ',F6.2)
+16 format('# a = ',F10.4,'; b= ',F10.4,'; c= ',F10.4,'; d= ',F10.4)
 17 format('# Zero Point Energy:',F10.4 )
   !
   if (IPR) then
@@ -111,6 +111,8 @@ program QP_program
      !
      call Trans_x_matrix  ! x_mtx(i,j)= < psi_i | x | psi_j >
      !
+     call E_mean_WP ! Energy mean value computed.
+     !
      !Temporal evolution
      !
      tdim = int(tmax/tstep)
@@ -122,6 +124,8 @@ program QP_program
      do i=2,tdim
         t_vec(i) = t_vec(i-1) + tstep
      enddo
+     !
+     call Prob_dens
      !
   Case Default
      !
