@@ -8,7 +8,7 @@ program QP_program
   implicit none
   !
   Character(len=100):: nm_file
-  integer i
+  integer i,j
   !
   Namelist/HIL/ Ncon,Nval
   Namelist/POT/ a,b,c,d
@@ -60,11 +60,6 @@ program QP_program
   write(*,*) 
   write(*,*) 
   !
-14 format("# Potential V(x)=ax**4+bx**3+cx**2+dx")
-15 format('# Hilbert Space truncated:',I5,';  States considered: g.s. + ',I5)
-16 format('# a = ',F10.4,'; b= ',F10.4,'; c= ',F10.4,'; d= ',F10.4)
-17 format('# Zero Point Energy:',F10.4 )
-  !
   if (IPR) then
      !
      allocate(IPR_vec(0:Nval))
@@ -79,6 +74,20 @@ program QP_program
         write(*,*) i,E(i),IPR_vec(i),x_prod(i)
      enddo
      !
+     open(unit=111,file="EF_HO_basis.dat",status='replace')
+     !
+     write(111,14)  
+     write(111,15) Ncon,Nval
+     write(111,16) a,b,c,d
+     write(111,17) Ezero
+     write(111,'(A)') "# Each line = eigenstate in HO basis"
+     !
+     do i=1,Nval
+        write(111,*) (H(j,i),j=1,Ncon)
+     enddo
+     !
+     close(111)
+     !
   else
      !
      write(*,'(A)') '# k - E_k'
@@ -89,6 +98,11 @@ program QP_program
      enddo
      !
   endif
+  !
+14 format("# Potential V(x)=ax**4+bx**3+cx**2+dx")
+15 format('# Hilbert Space truncated:',I5,';  States considered: g.s. + ',I5)
+16 format('# a = ',F10.4,'; b= ',F10.4,'; c= ',F10.4,'; d= ',F10.4)
+17 format('# Zero Point Energy:',F10.4 )
   !
   Select case (temp)
      !
